@@ -13,24 +13,62 @@
 </head>
 
 <body class="bg-secondary-subtle">
-  <!-- friend navbar -->
+  <!-- friend Navbar -->
   <nav class="navbar navbar-expand-lg" style="background-color: #e3f2fd;">
     <div class="container-fluid">
-      <a class="navbar-brand h1" href="#">Fake f.d. List</a>
+      <a class="navbar-brand" href="#">C2-KEY-HW</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item active">
+            <a class="nav-link" href="#" id="home">
+              Home
+              <span class="visually-hidden">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link favoriteBtn" href="#">Favorite</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
 
   <div class="container-fluid mt-3">
-    <div class="row" id="data-panel">
+
+    <!-- searchbar -->
+    <form class="row row-cols-lg-auto g-3 align-items-center justify-content-center" id="submitButton">
+
+      <div class="col-4">
+        <label class="visually-hidden" for="inlineFormInputGroupFriendname">friend name...
+        </label>
+        <div class="input-group">
+          <input type="text" class="form-control text-center" id="friendNameKey" placeholder="friend name...">
+        </div>
+      </div>
+
+      <div class="col-4">
+        <button type="submit" class="btn btn-info form-control text-center">Search</button>
+      </div>
+
+    </form>
+
+
+    <div class="row mt-3" id="data-panel">
       <!-- Render friends list -->
     </div>
   </div>
 
+  <!-- pagination -->
+  <nav aria-label="Page navigation example" class="sticky-bottom">
+    <ul class="pagination justify-content-center" id="paginator">
+      <!-- pagination Number Render -->
+    </ul>
+  </nav>
 
   <!-- friend Modal -->
   <div class="modal" tabindex="-1" id="friendDetailsModal">
@@ -47,17 +85,18 @@
             </div>
             <div class="introtext col-sm-6 d-flex align-items-center">
               <div>
-                <p class="email">email:</p>
-                <p class="gender">gender:</p>
-                <p class="age">age:</p>
-                <p class="region">region:</p>
-                <p class="birthday">birthday:</p>
+                <p class="email"></p>
+                <p class="gender"></p>
+                <p class="age"></p>
+                <p class="region"></p>
+                <p class="birthday"></p>
               </div>
             </div>
           </div>
         </div>
         <div class="modal-footer" style="background-color: #e3f2fd;">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-add-favorite btn-info">Add to BestFriends</button>
         </div>
       </div>
     </div>
