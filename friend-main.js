@@ -24,12 +24,16 @@ const favoriteList = document.querySelector('.favoriteList')
 
 // 渲染初始資料畫面
 function renderFriendList(Data) {
+  const bestFriendsListID = JSON.parse(localStorage.getItem('favoriteFriendsID')) || []
   let friendListHTML = ""
   Data.forEach((friend) => {
-    friendListHTML += `
+
+    if (bestFriendsListID.includes(friend.id)) {
+      friendListHTML += `
       <div class="col-6 col-sm-2">
         <div class="mb-2 mt-0 ms-0">
           <div class="card mb-1">
+          <i class="fa-solid fa-heart fa-2xl favorite-icon" id="favorite-${friend.id}" style="color: #de1212;"></i>
             <img src=${friend.avatar} class="selfie img-fluid border border-secondary"
               alt="friend-selfie" type="button" class="btn" data-bs-toggle="modal"
               data-bs-target="#friendDetailsModal" data-id=${friend.id}>
@@ -40,8 +44,38 @@ function renderFriendList(Data) {
         </div>
       </div>
     `
+    } else if (!bestFriendsListID.includes(friend.id)) {
+      friendListHTML += `
+      <div class="col-6 col-sm-2">
+        <div class="mb-2 mt-0 ms-0">
+          <div class="card mb-1">
+          <i class="fa-solid fa-heart fa-2xl favorite-icon d-none" id="favorite-${friend.id}" style="color: #de1212;"></i>
+            <img src=${friend.avatar} class="selfie img-fluid border border-secondary"
+              alt="friend-selfie" type="button" class="btn" data-bs-toggle="modal"
+              data-bs-target="#friendDetailsModal" data-id=${friend.id}>
+          </div>
+          <div class="card-footer">
+            <p class="friendNameSurname text-center border border-secondary" style="background-color: #e3f2fd;" data-id=${friend.id}>${friend.name} ${friend.surname}</p>
+          </div>
+        </div>
+      </div>
+    `
+    }
   });
   dataPanel.innerHTML = friendListHTML
+}
+
+
+// 渲染查詢或初始狀態每一頁的呈現資料
+function renderEachPage(pageNumber) {
+  const data = filterFriends.length ? filterFriends : friends
+  // 註記，這裡記得用length當作存在東西，根據導流的資料是有查詢的，還是沒查詢的分野
+  const currentPage = pageNumber
+  const dataStart = (currentPage - 1) * pageDisplayNumber
+  const dataEnd = currentPage * pageDisplayNumber
+  const dataToDisplay = data.slice(dataStart, dataEnd)
+
+  renderFriendList(dataToDisplay)
 }
 
 
@@ -115,22 +149,10 @@ function pageNumActive(event) {
 }
 
 
-// 渲染查詢或初始狀態每一頁的呈現資料
-function renderEachPage(pageNumber) {
-  const data = filterFriends.length ? filterFriends : friends
-  // 註記，這裡記得用length當作存在東西，根據導流的資料是有查詢的，還是沒查詢的分野
-  const currentPage = pageNumber
-  const dataStart = (currentPage - 1) * pageDisplayNumber
-  const dataEnd = currentPage * pageDisplayNumber
-  const dataToDisplay = data.slice(dataStart, dataEnd)
-
-  renderFriendList(dataToDisplay)
-}
-
-
 // 點擊addToBestFriend新增喜愛作動modal
 function addToFavorite(id) {
   const bestFriendsList = JSON.parse(localStorage.getItem('favoriteFriends')) || []
+  const bestFriendsListID = JSON.parse(localStorage.getItem('favoriteFriendsID')) || []
   const clickedTriggerFriend = friends.find((friend) => friend.id === id)
 
   if (bestFriendsList.some(friend => friend.id === id)) {
@@ -138,7 +160,9 @@ function addToFavorite(id) {
   }
 
   bestFriendsList.push(clickedTriggerFriend)
+  bestFriendsListID.push(clickedTriggerFriend.id)
   localStorage.setItem('favoriteFriends', JSON.stringify(bestFriendsList))
+  localStorage.setItem('favoriteFriendsID', JSON.stringify(bestFriendsListID))
 
   modalHeader.innerHTML = `
     <i class="fa-solid fa-star" style="color: #FFD43B;"> Favorite </i>
@@ -151,12 +175,14 @@ function addToFavorite(id) {
     <button type="button" class="btn btn-remove-favorite btn-outline-danger" data-id=${clickedTriggerFriend.id}>Remove from Favorites</button>
   `
   favoriteCanvaOn()
+  document.querySelector(`#favorite-${id}`).classList.remove('d-none')
 }
 
 
 // 點擊remove刪除按鈕後做動modal／重call canva
 function removeFromFavorite(id) {
   const bestFriendsList = JSON.parse(localStorage.getItem('favoriteFriends')) || []
+  const bestFriendsListID = JSON.parse(localStorage.getItem('favoriteFriendsID')) || []
   const clickedTriggerFriend = friends.find((friend) => friend.id === id)
   const removeIndex = bestFriendsList.findIndex((friend) => friend.id === id)
 
@@ -166,7 +192,10 @@ function removeFromFavorite(id) {
 
   if (bestFriendsList.some(friend => friend.id === id)) {
     bestFriendsList.splice(removeIndex, 1)
+    bestFriendsListID.splice(removeIndex, 1)
     localStorage.setItem('favoriteFriends', JSON.stringify(bestFriendsList))
+    localStorage.setItem('favoriteFriendsID', JSON.stringify(bestFriendsListID))
+
 
     modalHeader.innerHTML = `
       <h5 class="modal-title">${clickedTriggerFriend.name} ${clickedTriggerFriend.surname}</h5>
@@ -182,6 +211,7 @@ function removeFromFavorite(id) {
   }
 
   favoriteCanvaOn()
+  document.querySelector(`#favorite-${id}`).classList.add('d-none')
 }
 
 
