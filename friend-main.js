@@ -17,6 +17,8 @@ const friendPicture = document.querySelector('.friendPicture')
 const modalFooter = document.querySelector('.modal-footer')
 const introText = document.querySelector('.introtext')
 const modalHeader = document.querySelector('.modal-header')
+const offcanvasBody = document.querySelector('.offcanvas-body')
+const favoriteList = document.querySelector('.favoriteList')
 
 
 
@@ -25,11 +27,11 @@ function renderFriendList(Data) {
   let friendListHTML = ""
   Data.forEach((friend) => {
     friendListHTML += `
-      <div class="col-sm-2">
+      <div class="col-6 col-sm-2">
         <div class="mb-2 mt-0 ms-0">
           <div class="card mb-1">
             <img src=${friend.avatar} class="selfie img-fluid border border-secondary"
-              alt="friend-selfie" type="button" class="btn btn-primary" data-bs-toggle="modal"
+              alt="friend-selfie" type="button" class="btn" data-bs-toggle="modal"
               data-bs-target="#friendDetailsModal" data-id=${friend.id}>
           </div>
           <div class="card-footer">
@@ -148,10 +150,11 @@ function addToFavorite(id) {
      <button type="button" class="btn btn-add-favorite btn-info" data-id=${clickedTriggerFriend.id}>Added Completed!</button>
     <button type="button" class="btn btn-remove-favorite btn-outline-danger" data-id=${clickedTriggerFriend.id}>Remove from Favorites</button>
   `
+  favoriteCanvaOn()
 }
 
 
-// 點擊remove刪除按鈕後做動modal
+// 點擊remove刪除按鈕後做動modal／重call canva
 function removeFromFavorite(id) {
   const bestFriendsList = JSON.parse(localStorage.getItem('favoriteFriends')) || []
   const clickedTriggerFriend = friends.find((friend) => friend.id === id)
@@ -177,8 +180,41 @@ function removeFromFavorite(id) {
   } else {
     return alert('You have removed this friend!')
   }
+
+  favoriteCanvaOn()
 }
 
+
+// 渲染canva的畫面
+function favoriteCanvaOn() {
+  const bestFriendsList = JSON.parse(localStorage.getItem('favoriteFriends')) || []
+
+  if (bestFriendsList.length === 0) {
+    favoriteList.innerHTML = `
+    <p class="text-center fs-5" type="button" class="btn-close" data-bs-dismiss="offcanvas">Nothing to see here...</p>
+    `
+    return
+  }
+
+  let CanvaList = ''
+  bestFriendsList.forEach((friend) => {
+    CanvaList += `
+        <div class="row">
+          <div class="row col-5 mb-3 mt-0 ms-1">
+            <img src=${friend.avatar} class="selfie border border-secondary" alt="friend-selfie" type="button" class="btn"
+              data-bs-toggle="modal" data-id=${friend.id} data-bs-target="#friendDetailsModal">
+          </div>
+          <div class="col-7 ps-3 introtext">
+            <p class="name">${friend.name} ${friend.surname}</p>
+            <p class="region">Region: ${friend.region}</p>
+            <p class="birthday">Birthday: ${friend.birthday}</p>
+          </div>
+        </div>
+        <hr>
+    `
+  })
+  favoriteList.innerHTML = CanvaList
+}
 
 
 // 提交查詢事件
@@ -204,6 +240,7 @@ dataPanel.addEventListener('click', function triggerFriendModal(event) {
   }
 })
 
+
 // 點擊分頁數字觸發事件
 pagination.addEventListener('click', function onPanelClicked(event) {
   event.preventDefault()
@@ -213,12 +250,16 @@ pagination.addEventListener('click', function onPanelClicked(event) {
   }
 })
 
+
 // 點home或主頁大標題回預設畫面第一頁
 navbar.addEventListener('click', function onNavClicked(event) {
   if (event.target.matches('#home') || event.target.matches('.navbar-brand')) {
     window.location.reload()
+  } else if (event.target.matches('.favoriteBtn')) {
+    favoriteCanvaOn()
   }
 })
+
 
 // 點擊Modal底部區域觸發事件
 modalFooter.addEventListener('click', function onModalFootClicked(event) {
@@ -230,12 +271,18 @@ modalFooter.addEventListener('click', function onModalFootClicked(event) {
   }
 })
 
+// 點擊canva的圖片觸發，也會跳出modal
+offcanvasBody.addEventListener('click', function onCanvaClicked(event) {
+  if (event.target.matches('.selfie')) {
+    uniqueFriendModal(Number(event.target.dataset.id))
+  }
+})
+
+
 // Call Friend API
 axios.get(INDEX_URL).then(response => {
   friends.push(...response.data.results)
   pageQuantity(friends.length)
   renderEachPage(1)
 })
-  .catch((err) => {
-    console.log(err)
-  })
+  .catch(err => console.log(err))
