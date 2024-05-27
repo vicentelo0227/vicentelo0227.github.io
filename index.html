@@ -15,7 +15,7 @@
 
 <body class="bg-secondary-subtle">
   <!-- friend Navbar -->
-  <nav class="navbar navbar-expand-lg" style="background-color: #e3f2fd;">
+  <nav class="navbar navbar-expand-lg sticky-top" style="background-color: #e3f2fd;">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">C2-KEY-HW</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -31,7 +31,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link favoriteBtn" href="#">Favorite</a>
+            <a class="nav-link favoriteBtn" href="#" type="button" data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Favorite</a>
           </li>
         </ul>
       </div>
@@ -42,8 +43,8 @@
   <div class="container-fluid mt-3">
 
     <!-- searchbar -->
-    <form class="row row-cols-lg-auto g-3 align-items-center justify-content-center" id="submitButton">
-
+    <form class="row row-cols-lg-auto g-3 align-items-center justify-content-center sticky-top search-bar-container"
+      id="submitButton">
       <div class="col-4">
         <label class="visually-hidden" for="inlineFormInputGroupFriendname">friend name...
         </label>
@@ -51,14 +52,12 @@
           <input type="text" class="form-control text-center" id="friendNameKey" placeholder="friend name...">
         </div>
       </div>
-
       <div class="col-4">
         <button type="submit" class="btn btn-info form-control text-center">Search</button>
       </div>
-
     </form>
 
-
+    <!-- render original data -->
     <div class="row mt-3" id="data-panel">
       <!-- Render friends list -->
     </div>
@@ -70,6 +69,8 @@
       <!-- pagination Number Render -->
     </ul>
   </nav>
+
+
 
   <!-- friend Modal -->
   <div class="modal" tabindex="-1" id="friendDetailsModal">
@@ -96,6 +97,27 @@
       </div>
     </div>
   </div>
+
+
+
+  <!-- offcanva -->
+  <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1"
+    id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title fa-solid fa-star" id="offcanvasScrollingLabel" style="color: #FFD43B;"> FAVORITE LIST
+      </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="favoriteList">
+        <!-- canvasList -->
+      </div>
+    </div>
+  </div>
+
+
+
+
 
 
   <!-- axios -->
