@@ -47,3 +47,9 @@ hr {
 .search-bar-container {
   top: 48px;
 }
+
+.favorite-icon {
+  position: absolute;
+  top: 20px;
+  left: 10px;
+}
