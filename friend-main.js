@@ -2,9 +2,9 @@ const BASE_URL = "https://user-list.alphacamp.io"
 const INDEX_URL = BASE_URL + "/api/v1/users"
 const SHOW_URL = BASE_URL + "/api/v1/users/"
 
+const pageDisplayNumber = 24
 const friends = []
 let filterFriends = []
-const pageDisplayNumber = 24
 
 const dataPanel = document.querySelector('#data-panel')
 const pagination = document.querySelector('#paginator')
@@ -12,8 +12,15 @@ const submitButton = document.querySelector('#submitButton')
 const friendNameKey = document.querySelector('#friendNameKey')
 const home = document.querySelector('#home')
 const navbar = document.querySelector('nav')
+// const friendName = document.querySelector('.modal-title')
+const friendPicture = document.querySelector('.friendPicture')
+const modalFooter = document.querySelector('.modal-footer')
+const introText = document.querySelector('.introtext')
+const modalHeader = document.querySelector('.modal-header')
 
-// 渲染朋友資料畫面
+
+
+// 渲染初始資料畫面
 function renderFriendList(Data) {
   let friendListHTML = ""
   Data.forEach((friend) => {
@@ -26,7 +33,7 @@ function renderFriendList(Data) {
               data-bs-target="#friendDetailsModal" data-id=${friend.id}>
           </div>
           <div class="card-footer">
-            <p class="friendNameSurname text-center border border-secondary" type="button" style="background-color: #e3f2fd;" data-id=${friend.id}>${friend.name} ${friend.surname}</p>
+            <p class="friendNameSurname text-center border border-secondary" style="background-color: #e3f2fd;" data-id=${friend.id}>${friend.name} ${friend.surname}</p>
           </div>
         </div>
       </div>
@@ -35,28 +42,48 @@ function renderFriendList(Data) {
   dataPanel.innerHTML = friendListHTML
 }
 
-//朋友介紹模塊
-function uniqueFriendModal(id) {
-  const friendName = document.querySelector('.modal-title')
-  const email = document.querySelector('.email')
-  const gender = document.querySelector('.gender')
-  const age = document.querySelector('.age')
-  const region = document.querySelector('.region')
-  const birthday = document.querySelector('.birthday')
-  const friendPicture = document.querySelector('.friendPicture')
 
-  axios.get(SHOW_URL + id).then(response => {
-    const friendObject = response.data
-    friendName.innerText = `${friendObject.name} ${friendObject.surname}`
-    email.innerText = "Email: " + friendObject.email
-    gender.innerText = "Gender: " + friendObject.gender
-    age.innerText = "Age: " + friendObject.age
-    region.innerText = "Region: " + friendObject.region
-    birthday.innerText = "Birthday: " + friendObject.birthday
-    friendPicture.innerHTML = `
-      <img src=${friendObject.avatar} alt="selfie" class="modalSelfie">
+// 點擊朋友大頭貼跳出的Modal
+function uniqueFriendModal(id) {
+  const bestFriendsList = JSON.parse(localStorage.getItem('favoriteFriends')) || []
+  const selectedFriend = friends.find((friend) => friend.id === id)
+
+  friendPicture.innerHTML = `
+      <img src=${selectedFriend.avatar} alt="selfie" class="modalSelfie img-fluid">
     `
-  })
+
+  introText.innerHTML = `
+    <div>
+      <p class="email">Email: ${selectedFriend.email}</p>
+      <p class="gender">Gender: ${selectedFriend.gender}</p>
+      <p class="age">Age: ${selectedFriend.age}</p>
+      <p class="region">Region: ${selectedFriend.region}</p>
+      <p class="birthday">Birthday: ${selectedFriend.birthday}</p>
+    </div>
+  `
+
+  if (bestFriendsList.some((friend) => friend.id === id)) {
+    modalHeader.innerHTML = `
+      <i class="fa-solid fa-star" style="color: #FFD43B;"> Favorite </i>
+      <h5 class="modal-title">${selectedFriend.name} ${selectedFriend.surname}</h5>
+    `
+  } else {
+    modalHeader.innerHTML = `
+      <h5 class="modal-title">${selectedFriend.name} ${selectedFriend.surname}</h5>
+    `
+  }
+
+  if (bestFriendsList.some((friend) => friend.id === id)) {
+    modalFooter.innerHTML = `
+      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-id=${selectedFriend.id}>Close</button>
+      <button type="button" class="btn btn-remove-favorite btn-outline-danger" data-id=${selectedFriend.id}>Remove from Favorites</button>
+    `
+  } else if (!bestFriendsList.some((friend) => friend.id === id)) {
+    modalFooter.innerHTML = `
+      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-id=${selectedFriend.id}>Close</button>
+      <button type="button" class="btn btn-add-favorite btn-outline-info" data-id=${selectedFriend.id}>Add to Favorites</button>
+    `
+  }
 }
 
 //分頁器要有多少頁，以及一些格式設定
@@ -73,6 +100,7 @@ function pageQuantity(amount) {
 }
 
 
+// 點擊分頁時，轉換顏色、樣式，醒目
 function pageNumActive(event) {
   const target = event.target
   const pageNum = document.querySelectorAll('.pageNum')
@@ -85,17 +113,70 @@ function pageNumActive(event) {
 }
 
 
-//渲染每一頁的呈現資料
+// 渲染查詢或初始狀態每一頁的呈現資料
 function renderEachPage(pageNumber) {
   const data = filterFriends.length ? filterFriends : friends
   // 註記，這裡記得用length當作存在東西，根據導流的資料是有查詢的，還是沒查詢的分野
-
   const currentPage = pageNumber
   const dataStart = (currentPage - 1) * pageDisplayNumber
   const dataEnd = currentPage * pageDisplayNumber
   const dataToDisplay = data.slice(dataStart, dataEnd)
 
   renderFriendList(dataToDisplay)
+}
+
+
+// 點擊addToBestFriend新增喜愛作動modal
+function addToFavorite(id) {
+  const bestFriendsList = JSON.parse(localStorage.getItem('favoriteFriends')) || []
+  const clickedTriggerFriend = friends.find((friend) => friend.id === id)
+
+  if (bestFriendsList.some(friend => friend.id === id)) {
+    return alert('This friend has been added to your favorite friend list')
+  }
+
+  bestFriendsList.push(clickedTriggerFriend)
+  localStorage.setItem('favoriteFriends', JSON.stringify(bestFriendsList))
+
+  modalHeader.innerHTML = `
+    <i class="fa-solid fa-star" style="color: #FFD43B;"> Favorite </i>
+    <h5 class="modal-title">${clickedTriggerFriend.name} ${clickedTriggerFriend.surname}</h5>
+  `
+
+  modalFooter.innerHTML = `
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-id=${clickedTriggerFriend.id}>Close</button>
+     <button type="button" class="btn btn-add-favorite btn-info" data-id=${clickedTriggerFriend.id}>Added Completed!</button>
+    <button type="button" class="btn btn-remove-favorite btn-outline-danger" data-id=${clickedTriggerFriend.id}>Remove from Favorites</button>
+  `
+}
+
+
+// 點擊remove刪除按鈕後做動modal
+function removeFromFavorite(id) {
+  const bestFriendsList = JSON.parse(localStorage.getItem('favoriteFriends')) || []
+  const clickedTriggerFriend = friends.find((friend) => friend.id === id)
+  const removeIndex = bestFriendsList.findIndex((friend) => friend.id === id)
+
+  if (bestFriendsList.length === 0) {
+    return alert('You do not have any best friend!')
+  }
+
+  if (bestFriendsList.some(friend => friend.id === id)) {
+    bestFriendsList.splice(removeIndex, 1)
+    localStorage.setItem('favoriteFriends', JSON.stringify(bestFriendsList))
+
+    modalHeader.innerHTML = `
+      <h5 class="modal-title">${clickedTriggerFriend.name} ${clickedTriggerFriend.surname}</h5>
+    `
+
+    modalFooter.innerHTML = `
+     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-id=${clickedTriggerFriend.id}>Close</button>
+     <button type="button" class="btn btn-add-favorite btn-outline-info" data-id=${clickedTriggerFriend.id}>Add to Favorites</button>
+     <button type="button" class="btn btn-remove-favorite btn-danger" data-id=${clickedTriggerFriend.id}>Removed Completed!</button>
+    `
+  } else {
+    return alert('You have removed this friend!')
+  }
 }
 
 
@@ -116,7 +197,7 @@ submitButton.addEventListener('submit', function onSubmitClicked(event) {
 })
 
 
-// 點擊大頭貼事件，觸發跳出介紹框框
+// 點擊大頭貼觸發事件
 dataPanel.addEventListener('click', function triggerFriendModal(event) {
   if (event.target.matches('.selfie')) {
     uniqueFriendModal(Number(event.target.dataset.id))
@@ -134,16 +215,24 @@ pagination.addEventListener('click', function onPanelClicked(event) {
 
 // 點home或主頁大標題回預設畫面第一頁
 navbar.addEventListener('click', function onNavClicked(event) {
-  if (!event.target.matches('.favoriteBtn')) {
+  if (event.target.matches('#home') || event.target.matches('.navbar-brand')) {
     window.location.reload()
   }
 })
 
+// 點擊Modal底部區域觸發事件
+modalFooter.addEventListener('click', function onModalFootClicked(event) {
+  const friendID = Number(event.target.dataset.id)
+  if (event.target.matches('.btn-add-favorite')) {
+    addToFavorite(friendID)
+  } else if (event.target.matches('.btn-remove-favorite')) {
+    removeFromFavorite(friendID)
+  }
+})
 
 // Call Friend API
 axios.get(INDEX_URL).then(response => {
   friends.push(...response.data.results)
-
   pageQuantity(friends.length)
   renderEachPage(1)
 })
