@@ -23,9 +23,15 @@
 
 .friendNameSurname:hover {
   user-select: none;
-  color: rgb(102, 187, 169);
+  /* color: rgb(102, 187, 169); */
 }
 
 .pageNum.active {
   background-color: rgb(48, 210, 242);
+}
+
+.fa-star {
+  display: inline-block;
+  font-size: 20px;
+  margin-right: 1rem;
 }
